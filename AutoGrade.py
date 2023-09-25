@@ -2,14 +2,18 @@ import os
 from zipfile import ZipFile
 import glob
 import shutil
-
-
+import re
 
 #Class level things
 defaultLocation = "Desktop\Grading"
 #note that this assumes you want C:\Users\[current user]\ BEFORE this text.
-IDEALocation = "C:\Users\Brandon\IdeaProjects\Grading"
+
+IDEALocation = os.path.join(os.environ['USERPROFILE'], "IdeaProjects\Grading")
 #This should be the location where you want the src folder to be in.
+
+standardNaming = True
+#this means that folders in the submission folder have the standard naming scheme for canvas. This ought to look like "name_some-ID_some-ID_name-of-file"
+#the important part is the name is first, and is followed by a '_' character.
 
 def setFileLocation():
     # Take some input as the where submissions are (probably want a default spot)
@@ -28,8 +32,7 @@ def unzip(location):
         filename = filename.replace(".zip", "")
         with ZipFile(file) as zipper:
             zipper.extractall(path=location+filename)
-
-    #TODO Might delete .zips after unzipping?
+        os.remove(file)
 
 def openSubmissions(location):
     for dir, subdir, file in os.walk(IDEALocation):
@@ -62,10 +65,28 @@ def openSubmissions(location):
         #now to reset for next submission
         shutil.rmtree(os.path.join(IDEALocation,"src"))
 
+def combineSameNames(location):
+    #TODO this section should combine the folders with the same names at the start. It looks like all folders are named "name_someid_rest-of-things". I will pull from name section to find ones that ought to be combined.
+    if standardNaming:
+        for src_dir, submissions, files in os.walk(location):
+            for submission in submissions:
+                submissionEdit = submission.split("_")[0]
+                if not os.path.exists(location + "/" + submissionEdit):
+                    os.makedirs(location + "/" + submissionEdit)
+                for file_ in files:
+                    file = os.path.join(location, file_)
+                    if os.path.exists(file):
+                        continue
+                    shutil.move(file, os.path.join(location, submissionEdit))
+
+    else:
+        print("Can't combine similar folders, I dont know the naming scheme.")
+
 def main():
     fileLocation = setFileLocation()
-    unzip(fileLocation)
-    openSubmissions(fileLocation)
+    #unzip(fileLocation)
+    combineSameNames(fileLocation)
+    #openSubmissions(fileLocation)
     print("\n")
     print("-----DONE GRADING-----\n")
 
