@@ -2,7 +2,7 @@ import os
 from zipfile import ZipFile
 import glob
 import shutil
-import re
+from distutils.dir_util import copy_tree
 
 #Class level things
 defaultLocation = "Desktop\Grading"
@@ -68,27 +68,27 @@ def openSubmissions(location):
 def combineSameNames(location):
     #TODO this section should combine the folders with the same names at the start. It looks like all folders are named "name_someid_rest-of-things". I will pull from name section to find ones that ought to be combined.
     if standardNaming:
-        for src_dir, submissions, files in os.walk(location):
-            for submission in submissions:
+        for dirpath, subdirs, files in os.walk(location):
+            for submission in subdirs:   
+                # Define your source and destination folders
                 submissionEdit = submission.split("_")[0]
-                if not os.path.exists(location + "/" + submissionEdit):
-                    os.makedirs(location + "/" + submissionEdit)
-                for file_ in files:
-                    file = os.path.join(location, file_)
-                    if os.path.exists(file):
-                        continue
-                    shutil.move(file, os.path.join(location, submissionEdit))
+                source = os.path.join(dirpath, submission)
+                diestination = os.path.join(dirpath, submissionEdit)
+
+                # Merge folders using copy_tree()
+                copy_tree(source, diestination)
+                shutil.rmtree(source)
 
     else:
         print("Can't combine similar folders, I dont know the naming scheme.")
 
 def main():
     fileLocation = setFileLocation()
-    #unzip(fileLocation)
+    unzip(fileLocation)
     combineSameNames(fileLocation)
     #openSubmissions(fileLocation)
-    print("\n")
-    print("-----DONE GRADING-----\n")
+    #print("\n")
+    #print("-----DONE GRADING-----\n")
 
 if __name__ == "__main__":
     main()
