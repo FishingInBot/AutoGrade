@@ -3,12 +3,13 @@ from zipfile import ZipFile
 import glob
 import shutil
 
-#Class level things
-defaultLocation = "Desktop\Grading" 
-#note that this assumes you want C:\Users\[current user]\ BEFORE this text.
-IDEALocation = "D:\school\CSCI242\Grading"
-#This should be the location where you want the src folder to be in.
 
+
+#Class level things
+defaultLocation = "Desktop\Grading"
+#note that this assumes you want C:\Users\[current user]\ BEFORE this text.
+IDEALocation = "C:\Users\Brandon\IdeaProjects\Grading"
+#This should be the location where you want the src folder to be in.
 
 def setFileLocation():
     # Take some input as the where submissions are (probably want a default spot)
@@ -69,4 +70,4 @@ def main():
     print("-----DONE GRADING-----\n")
 
 if __name__ == "__main__":
-    main()    
+    main()
