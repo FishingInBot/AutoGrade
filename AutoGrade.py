@@ -2,7 +2,7 @@ import os
 from zipfile import ZipFile
 import glob
 import shutil
-from distutils.dir_util import copy_tree
+import errno
 
 #Class level things
 defaultLocation = "Desktop\Grading"
@@ -24,9 +24,9 @@ def setFileLocation():
     return fileLocation
 
 def unzip(location):
-    # Unzip any submissions
+    #Unzip any submissions
     #TODO maybe combine ones with same name?
-    files = glob.glob(location+"/*.zip")
+    files = glob.glob(location+".*(\.zip)")
     for file in files:
         filename = file.replace(location,"")
         filename = filename.replace(".zip", "")
@@ -43,16 +43,16 @@ def openSubmissions(location):
     for submission in submissions:
         if ".zip" in submission:
             submissions.remove(submission)
-
-    for submission in submissions:
         proceed = ""
         srcFolder = ""
+
         for dirpath, subdirs, files in os.walk(os.path.join(location,submission)):
             for x in subdirs:
                 if "src" in x and "MACOSX" not in dirpath:
                     srcFolder = os.path.join(dirpath, x)
         if srcFolder == "":
             print("Unable to find src folder in directory: " + submission)
+            proceed = "yes"
             os.mkdir(os.path.join(IDEALocation,"src"))
 
         else:
@@ -62,33 +62,15 @@ def openSubmissions(location):
         while proceed != "yes":
             proceed = input("Type yes to continue: ")
         
-        #now to reset for next submission
+        #Now to reset for next submission
         shutil.rmtree(os.path.join(IDEALocation,"src"))
-
-def combineSameNames(location):
-    #TODO this section should combine the folders with the same names at the start. It looks like all folders are named "name_someid_rest-of-things". I will pull from name section to find ones that ought to be combined.
-    if standardNaming:
-        for dirpath, subdirs, files in os.walk(location):
-            for submission in subdirs:   
-                # Define your source and destination folders
-                submissionEdit = submission.split("_")[0]
-                source = os.path.join(dirpath, submission)
-                diestination = os.path.join(dirpath, submissionEdit)
-
-                # Merge folders using copy_tree()
-                copy_tree(source, diestination)
-                shutil.rmtree(source)
-
-    else:
-        print("Can't combine similar folders, I dont know the naming scheme.")
 
 def main():
     fileLocation = setFileLocation()
     unzip(fileLocation)
-    combineSameNames(fileLocation)
-    #openSubmissions(fileLocation)
-    #print("\n")
-    #print("-----DONE GRADING-----\n")
+    openSubmissions(fileLocation)
+    print("\n")
+    print("-----DONE GRADING-----\n")
 
 if __name__ == "__main__":
     main()
